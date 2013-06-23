@@ -29,81 +29,125 @@ def solveIt(inputData):
 
     weights_values = [weights,values]
     
+    #adds a zero-value col
+    def make_zero_col():
+        #adds a zeros column to end of array
+        weights.insert(0,0)
+        values.insert(0,0)
 
-    max_values = []
+    def remove_zero_col():
+        #removes zeros colum to end of array
+        weights.pop(0)
+        values.pop(0)
+    
     #builds max_values matrix
-    for r in (range(0,capacity)):
-        max_values.append([])
-        for c in (range(0,items)):
-            max_values[r].append([])
-    return max_values
+    max_values = []
+
+    def build_matrix():
+        for r in (range(0,capacity+1)):
+            max_values.append([])
+            for c in (range(0,items+1)):
+                max_values[r].append([])
     
     #this function builds the max_values matrix
-    def maximize(current_cap,current_item,current_val):
+    # def maximize(current_cap, current_item, current_val):
 
-        if (weights[current_item] < capacity-current_cap):
-            # if weight of current item is less than total capacity - current_cap
-            # add the item's value to table
-            # increment current_cap
-            # then recursive call maximize of current_cap 
-            # and add current item's val to current_val
+    #     if (current_cap > capacity and current_item > items):
+    #         #stop recursion and return false
+    #         return false
+
+    #     elif (current_cap > capacity):
+    #         #go to next item
+    #         current_item += 1
+    #         #reset cap or begin at row 1
+    #         current_cap = 0
+
+    #         #recurse
+    #         maximize(current_cap,current_item,current_val)
+    #         return true
+
+    #     elif (current_item > items):
+    #         return false
+
+    #     elif (weights[current_item] < current_cap):
+    #         #add it to the knapsack 
+    #         #and add its value to current_val
+    #         current_val += values[item]
             
-            #update matrix
-            max_values[current_cap][current_item] = values[current_item]
+    #         #update matrix
+    #         max_values[current_cap][current_item] = values[current_item]
             
-            #update current_val acc.
-            current_val+=values[current_item]
+    #         #update current_val acc.
+    #         current_val+=values[current_item]
 
-            #increment item
-            current_item+=1
+    #         #increment item
+    #         current_item+=1
 
-            #recurse
-            maximize(current_cap,current_item,current_val)
+    #         #recurse
+    #         maximize(current_cap,current_item,current_val)
                 
 
-        elif (weights[current_item] == capacity-current_cap):
-            # else if weight of current item = total capacity - current_cap
-            # K is at capacity if current item is include
-            # add the item's value + current_total_val to table
-            # stop the recursion
-            # and current_val
+    #     elif (weights[current_item] == capacity-current_cap):
+    #         # else if weight of current item = total capacity - current_cap
+    #         # K is at capacity if current item is include
+    #         # add the item's value + current_total_val to table
+    #         # stop the recursion
+    #         # and current_val
 
-            #add current_val and val of current item to matrix
-            max_values[cap][item] = values[item]+current_val
+    #         #add current_val and val of current item to matrix
+    #         max_values[cap][item] = values[item]+current_val
 
-            #no recursion
+    #         #no recursion
 
-        elif (weights[item] > capacity-current_cap):
+    #     elif (weights[item] > capacity-current_cap):
 
-            max_values[current_cap][current_item] = current_val
+    #         max_values[current_cap][current_item] = current_val
 
+    #     else:
+    #         max_values[cap][item] = current_val
+
+    def item_fits(item_index,current_cap):
+        if(weights[item_index] <= current_cap):
+            return True
         else:
-            max_values[cap][item] = current_val
+            return False
 
-            #debug
-            # print 'Current cap: ' + str(current_cap)
-            # print 'Current index: ' + str(index)
-            
-            #increments current cap
-            # current_cap += 1
+    def add_val_of_last_item(current_val,current_cap,current_item):
+        #if the last item fits and the remaining capacity is not zero
+        
+        if(current_cap > 0 and current_item > 0 and weights[current_item-1] <= current_cap):
+            #add last most valuable item to knapsack
+            current_val += values[current_item-1]
+            #compare current item to item before that
+            add_val_of_last_item(current_val,current_cap-weights[current_item-1],current_item-2)
+        else:
+            return current_val
 
-            #if the weight of the current item
-            #is less than the current capacity
-            #then add the value of current item
-            #to the max_values matrix
+    def get_max_val_by_index(current_cap,current_item,current_val):
+        #if current item fits the remaining capacity
+        if(item_fits(current_item,current_cap)):
+            #then add it to current_val
+            current_val += values[current_item]
 
+            #subtract its weight from current max_cap
+            current_cap -= weights[current_item]
 
-        #     if weights_values[0][index] <= current_cap:
-        #         #if the item fits its value is added to
-        #         #the max_values matrix
-        #         max_values[index].append(weights_values[1][index])
+            #recurse for previous items
+            print 'recursed at ' + str(current_item) + ' ' + str(current_cap)
+            print 'current val is ' + str(current_val)
+
+            return add_val_of_last_item(current_val,current_cap,current_item)
+
+        elif(current_cap==0 and current_item==0):
+            # return current_val
+            return current_val
+        #if the item doesn't fit
+        else:
+            #enter the current_val into the max_values matrix
+            return current_val
                 
-        #     else:
-        #         #if the item doesn't fit, the values matrix
-        #         #has a zero added
-        #         max_values[index].append(0)
 
-    solutions = []
+
 
     # a trivial greedy algorithm for filling the knapsack
     # it takes items in-order until the knapsack is full
@@ -131,26 +175,45 @@ def solveIt(inputData):
     # various configurations
 
     #debug
-    print '[ [weights], [values] ]'
-    print weights_values
+    # print '[ [weights], [values] ]'
+    # print weights_values
 
     #debug
-    print 'maximize func'
-    print maximize(0,0,0)
+    # print 'maximize func'
+    # print maximize(0,0,0)
+
+    #builds matrix
+    build_matrix()
+    #adds zeros
+    make_zero_col()
+
+    
+    #debug
+    #populate matrix
+    for current_cap in (range(0,capacity+1)):
+        for current_item in (range(0,items+1)):
+            max_values[current_cap][current_item] = get_max_val_by_index(current_cap,current_item,0)
+            
 
     #debug shows heading of max_vals matrix
     z = 0
     a = []
-    for z in range(0,items):
+    for z in range(0,items+1):
         a.append(z)
-    print "Max Values of items..."
     print "-------"
+    print "Max Values of items..."
     print a
     print "-------"
+    print "Weights of items..."
+    print weights
+    print "Values of items..."
+    print values
+    print "-------"
 
+    
     #debug - checks context of max_values matrix
     for r in range(0, len(max_values)):
-        print max_values[r]
+        print 'cap '+str(r)+ ': ' + str(max_values[r])
 
 
     #debug
