@@ -146,7 +146,11 @@ def solveIt(inputData):
             #enter the current_val into the max_values matrix
             return current_val
                 
-
+    def populate_matrix():
+        for current_cap in (range(0,capacity+1)):
+            for current_item in (range(0,items+1)):
+                max_values[current_cap][current_item] = get_max_val_by_index(current_cap,current_item,0)
+                
 
 
     # a trivial greedy algorithm for filling the knapsack
@@ -187,13 +191,8 @@ def solveIt(inputData):
     #adds zeros
     make_zero_col()
 
-    
     #debug
-    #populate matrix
-    for current_cap in (range(0,capacity+1)):
-        for current_item in (range(0,items+1)):
-            max_values[current_cap][current_item] = get_max_val_by_index(current_cap,current_item,0)
-            
+    populate_matrix()
 
     #debug shows heading of max_vals matrix
     z = 0
