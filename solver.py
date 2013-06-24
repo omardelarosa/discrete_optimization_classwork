@@ -26,9 +26,11 @@ def solveIt(inputData):
         weights.append(int(parts[1]))
 
     items = len(values)
-
-    weights_values = [weights,values]
     
+    #------------------------
+    #-- BEGIN ALGORITHM 1 ---
+    #------------------------
+
     #adds a zero-value col
     def make_zero_col():
         #adds a zeros column to end of array
@@ -55,14 +57,6 @@ def solveIt(inputData):
             return True
         else:
             return False
-
-    def take_this_item(item_index,current_val,current_cap):
-        if(item_fits(item_index,current_cap)):
-            current_val += values[item_index]
-            current_cap -= weights[item_index]
-            return current_val
-        else:
-            return current_val
 
     def compare_item_to_left(current_item,current_cap):
         #store data as variables
@@ -96,7 +90,10 @@ def solveIt(inputData):
             return val_of_item
 
     def which_items(cap,item,acc):
-        if(cap == 0 and item == 0):
+        #identifies index of which items are taken and populates
+        #the 'taken' array
+
+        if(item == 0):
             return acc
         elif(cap < 0 or item < 0):
             return acc
@@ -152,54 +149,51 @@ def solveIt(inputData):
         for r in range(0, len(max_values)):
             print 'cap '+str(r)+ ': ' + str(max_values[r])
 
+    def run_alg_1():
+        #runs the first algorithm
 
+        #builds matrix
+        build_matrix()
+        #adds zeros
+        make_zero_col()
 
-    # a trivial greedy algorithm for filling the knapsack
-    # it takes items in-order until the knapsack is full
+        #debug
+        populate_matrix()
+
+        #debug - shows heading of max_values matrix with key
+        # display_matrix_header()
+
+        # #debug - visualizes max_values matrix
+        # display_matrix()
+
+        
+        # populates 'taken' array of which items were taken
+        which_items(capacity,items,taken)
+
+        # print taken
+
+        #returns best value
+        return max_values[capacity][items]
+
+    #-------------------------
+    #--- END ALGORITHM 1 -----
+    #-------------------------
+
+    
     value = 0
     weight = 0
     taken = []
+    
+    #------------------------
+    #-- RUN ALGORITHM 1 ---
+    #------------------------
 
-    # for i in range(0, items):
-    #     #determines if the current total weight and the new added weight exceed capacity
-    #     if weight + weights[i] <= capacity:
-    #         #append a 'true' value to the taken array.
-    #         #this is also what is outputed at the bottom of each line.
-    #         taken.append(1)
+    #sets value to result from running algorithm 1
+    value = run_alg_1()
 
-    #         #total value is incremented by the value of current item
-    #         value += values[i]
-
-    #         #weight is incremented by the weight of the current item.
-    #         weight += weights[i]
-    #     else:
-    #         taken.append(0)
-
-    # need to represent a comparison between the 'values' of
-    # various configurations
-
-    #builds matrix
-    build_matrix()
-    #adds zeros
-    make_zero_col()
-
-    #debug
-    populate_matrix()
-
-    #debug shows heading of max_vals matrix
-    # display_matrix_header()
-
-    # #debug
-    # display_matrix()
-
-    #debug
-    # print 'Which Items: '
-    which_items(capacity,items,taken)
-
-    #sets value
-    value = max_values[capacity][items]
-
-    #end algorithm
+    #-------------------------
+    #--- STOP ALGORITHM 1 ----
+    #-------------------------
 
     # prepare the solution in the specified output format
     outputData = str(value) + ' ' + str(0) + '\n'
