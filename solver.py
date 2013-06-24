@@ -64,43 +64,48 @@ def solveIt(inputData):
         else:
             return current_val
 
+    def compare_item_to_left(current_item,current_cap):
+        #store data as variables
+        if(values[current_item]):
+            val_of_item = values[current_item]
+        else:
+            val_of_item = 0
+        if(max_values[current_cap][current_item-1]):
+            val_to_left = max_values[current_cap][current_item-1]
+        else:
+            val_to_left = 0
+        if(max_values[current_cap-weights[current_item]][current_item-1]):
+            val_to_left_down = max_values[current_cap-weights[current_item]][current_item-1]
+        else:
+            val_to_left_down = 0
+        #check if current item is better than item to its left (last item at same capacity)
+        if(val_of_item < val_to_left):
+            #if it is....
+            #check if val to left_down + cu
+            if((val_to_left_down + val_of_item) > val_to_left):
+                #just return their sum
+                return val_to_left_down + val_of_item
+            #otherwise
+            else:
+                #return val_to_left
+                return val_to_left
+        #if it's not...
+        #check if current item + val of diag left item are great
+        else:
+            #return the item to its left instead
+            return val_of_item
+
     def get_val_of_best_item(current_item,current_cap):
         #if there's no space, take the 0th item (no item)
         if(current_cap == 0):
             return 0
-        #if current item doesn't fit
-        elif(not item_fits(current_item,current_cap)):
-            #checkif last item fits at current capacity
-            if(item_fits(current_item-1,current_cap)):
-                #check if max_values at current_cap, last col is not null
-                if(max_values[current_cap][current_item-1]):
-                    #if so, return the value of the last item at new capacity
-                    return max_values[current_cap][current_item-1]
-                else:
-                    #return nothing
-                    return 0
-            else:
-                return 0
-            
+        #if current item doesn't fit and something is to the left
+        elif(not item_fits(current_item,current_cap) and max_values[current_cap][current_item-1]):
+            #get value of item to the left
+            return max_values[current_cap][current_item-1]
         #else if current item fits
-        elif(weights[current_item] <= current_cap):
-            #check if current item is better than item to its left (last item at same capacity)
-            if(values[current_item] >= max_values[current_cap][current_item-1]):
-                #if it is....
-                #and if its weight is equal to current capacity
-                if(weights[current_item] == current_cap):
-                    return values[current_item]
-                else:
-                    #store new_capacity with current item's weight subtracted
-                    new_cap = current_cap - weights[current_item]
-                    if(not max_values[new_cap][current_item-1]):
-                        return values[current_item] + 0
-                    else:
-                        return values[current_item] + max_values[new_cap][current_item-1]
-            #if it's not...
-            else:
-                #return the item to its left instead
-                return max_values[current_item][current_item-1]
+        elif(item_fits(current_item,current_cap)):
+            return compare_item_to_left(current_item,current_cap)
         else:
             return 0
             # return 'y'
