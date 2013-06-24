@@ -64,61 +64,6 @@ def solveIt(inputData):
         else:
             return current_val
 
-    def get_last_item_value(current_cap,current_item):
-        last_item = current_item-1
-        #if the last item fits
-        if(last_item >= 0 and item_fits(last_item,current_cap)):
-
-            #debug
-            # print 'Got last item value for: ' + str(last_item)
-
-            #return its value + the value of the item before that
-            return values[last_item] + get_last_item_value((current_cap - weights[last_item]),last_item-1)
-        else:
-            return 0
-
-    def find_max_of_last_items(current_item,current_cap,current_highest_val_index):
-        #begins with current item's index as highest
-        #returns index of max item
-
-        #stores last_item as var
-        last_item = current_item - 1
-
-        #checks to see if not on 0th item
-        if(last_item >= 0):
-            #if last_item's value is higher than current_item's value
-            if(values[last_item] > values[current_item]):
-                #recursively check if the value of last_item is higher than the value before that one
-                return find_max_of_last_items(last_item,current_cap,last_item)
-            #if the current item's value is higher or equal to last item
-            elif(values[last_item] <= values[current_item]):
-                #then output current_item's index, which on the first recursion is the same
-                return current_item
-        else:
-            #stop recursion
-            return current_highest_val_index
-
-    def find_max_of_last_items2(current_item,current_cap,current_highest_val_index):
-        #begins with current item's index as highest
-        #returns index of max item
-
-        #stores last_item as var
-        last_item = current_item - 1
-
-        #checks to see if not on 0th item
-        if(last_item >= 0):
-            #if last_item's value is higher than current_item's value
-            if(max_values[current_cap][last_item] > values[current_item]):
-                #recursively check if the value of last_item is higher than the value before that one
-                return find_max_of_last_items(last_item,current_cap,last_item)
-            #if the current item's value is higher or equal to last item
-            elif(values[last_item] <= values[current_item]):
-                #then output current_item's index, which on the first recursion is the same
-                return current_item
-        else:
-            #stop recursion
-            return current_highest_val_index
-
     def get_val_of_best_item(current_item,current_cap):
         #if there's no space, take the 0th item (no item)
         if(current_cap == 0):
@@ -180,76 +125,9 @@ def solveIt(inputData):
             #return nothing
             return acc
 
-
-    def get_max_val_by_index(current_cap,current_item,current_val):
-        #hold last_item as variable
-        last_item = current_item - 1
-        
-        if(last_item >= 0):
-            #get index of most valuable recent last item
-            mvi = find_max_of_last_items(current_item,current_cap,current_item)
-            
-            #mvi value var
-            mvi_value = values[mvi]
-
-            #if there's no room and no items left
-            if(current_cap < 0 and current_item < 0):
-                # return value thus far
-                return current_val
-            #else if current item doesn't fit
-            elif(not item_fits(mvi,current_cap)):
-                # return value thus far
-                return current_val
-            #else if the current item fits
-            elif(item_fits(mvi,current_cap)):
-                return take_this_item(mvi,current_val,current_cap)
-        else:
-            return current_val
-    
-    def get_max_val_by_index2(current_cap,current_item,current_val):
-        #hold last_item as variable
-        last_item = current_item - 1
-        #most_valuable_item index 
-        mvi = find_max_of_last_items(current_item,current_cap,current_item)
-
-        if(last_item >= 0):
-
-            #if there's no room and no items left
-            if(current_cap < 0 and current_item < 0):
-                # return value thus far
-                return current_val
-            #else if the current item fits
-            elif(item_fits(mvi,current_cap)):
-                #check if last_item also fits
-                if(current_cap > 0 and item_fits(last_item,current_cap)):
-                    #take the current item
-                    take_this_item(mvi ,current_val,current_cap)
-                    #if so, take the last item, too
-                    return take_this_item(last_item,current_val,current_cap)
-                else:
-                    #take the current item
-                    return take_this_item(current_item,current_val,current_cap)
-            #else if current item doesn't fit
-            else:
-                #check if last_item fits
-                if(item_fits(last_item,current_cap)):
-                    #if so, take it
-                    return take_this_item(last_item,current_val,current_cap)
-                else:
-                    #if not, output current_val
-                    return current_val
-        else:
-            return current_val
-
     def populate_matrix():
         for current_cap in (range(0,capacity+1)):
             for current_item in (range(0,items+1)):
-                #v1
-                #max_values[current_cap][current_item] = get_last_max_value_that_fits(current_item,current_cap,0) + get_max_val_by_index2(current_cap,current_item,0)
-
-                #v2
-                # max_values[current_cap][current_item] =  get_max_val_by_index(current_cap,current_item,0) + get_last_max_value_that_fits(current_item,current_cap,0)
-
                 #v3
                 max_values[current_cap][current_item] = get_val_of_best_item(current_item,current_cap)
 
