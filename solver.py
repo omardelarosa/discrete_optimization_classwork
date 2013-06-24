@@ -95,6 +95,22 @@ def solveIt(inputData):
             #return the item to its left instead
             return val_of_item
 
+    def which_items(cap,item,acc):
+        if(cap == 0 and item == 0):
+            return acc
+        elif(cap < 0 or item < 0):
+            return acc
+        elif(max_values[cap][item] == max_values[cap][item-1]):
+            #not taken
+            #add item value to array
+            acc.insert(0,0)
+            return which_items(cap,item-1,acc)
+        elif(max_values[cap][item] != max_values[cap][item-1]):
+            #taken
+            #adds item value to array
+            acc.insert(0,1)
+            return which_items(cap-weights[item],item-1,acc)
+
     def get_val_of_best_item(current_item,current_cap):
         #if there's no space, take the 0th item (no item)
         if(current_cap == 0):
@@ -110,30 +126,9 @@ def solveIt(inputData):
             return 0
             # return 'y'
 
-    def get_last_max_value_that_fits(current_item,current_cap,acc):
-        #check if last item fits
-        if(item_fits(current_item-1,current_cap)):
-            #check if the current item doesn't fit
-            if(not item_fits(current_item,current_cap)):
-                #if it doesn't, then store value of last max item
-                acc += max_values[current_cap][current_item-1]
-                #return value of last item
-                print 'Acc is ' + str(acc)
-                # #if last max item 
-                # if(max_values[current_cap-weights][current_item-1] < ):
-                return acc
-            else:
-            #return nothing
-                return acc
-        #if last item doesn't fit
-        else:
-            #return nothing
-            return acc
-
     def populate_matrix():
         for current_cap in (range(0,capacity+1)):
             for current_item in (range(0,items+1)):
-                #v3
                 max_values[current_cap][current_item] = get_val_of_best_item(current_item,current_cap)
 
     def display_matrix_header():
@@ -165,20 +160,20 @@ def solveIt(inputData):
     weight = 0
     taken = []
 
-    for i in range(0, items):
-        #determines if the current total weight and the new added weight exceed capacity
-        if weight + weights[i] <= capacity:
-            #append a 'true' value to the taken array.
-            #this is also what is outputed at the bottom of each line.
-            taken.append(1)
+    # for i in range(0, items):
+    #     #determines if the current total weight and the new added weight exceed capacity
+    #     if weight + weights[i] <= capacity:
+    #         #append a 'true' value to the taken array.
+    #         #this is also what is outputed at the bottom of each line.
+    #         taken.append(1)
 
-            #total value is incremented by the value of current item
-            value += values[i]
+    #         #total value is incremented by the value of current item
+    #         value += values[i]
 
-            #weight is incremented by the weight of the current item.
-            weight += weights[i]
-        else:
-            taken.append(0)
+    #         #weight is incremented by the weight of the current item.
+    #         weight += weights[i]
+    #     else:
+    #         taken.append(0)
 
     # need to represent a comparison between the 'values' of
     # various configurations
@@ -192,10 +187,17 @@ def solveIt(inputData):
     populate_matrix()
 
     #debug shows heading of max_vals matrix
-    display_matrix_header()
+    # display_matrix_header()
+
+    # #debug
+    # display_matrix()
 
     #debug
-    display_matrix()
+    # print 'Which Items: '
+    which_items(capacity,items,taken)
+
+    #sets value
+    value = max_values[capacity][items]
 
     #end algorithm
 
