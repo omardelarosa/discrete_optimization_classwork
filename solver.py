@@ -102,7 +102,7 @@ def solveIt(inputData):
 
         #check plausibility of value
         def is_continuing_worth_it(current_value,current_best):
-            if current_value >= current_best:
+            if current_value > current_best:
                 return True
             else:
                 return False
