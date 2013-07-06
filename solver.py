@@ -102,7 +102,7 @@ def solveIt(inputData):
 
         #check plausibility of value
         def is_continuing_worth_it(current_value,current_best):
-            if current_value > current_best:
+            if current_value >= current_best:
                 return True
             else:
                 return False
@@ -125,6 +125,8 @@ def solveIt(inputData):
                         #dont make new node
                         taken_node = False
                     #filter out values 
+                    #need to fix
+                    #this is not working correctly
                     if is_continuing_worth_it(parent_node.value,parent_node.current_best):
                         #make a not-taken node
                         not_taken_node = Node(item,parent_node.room,parent_node.value,parent_node.current_best-values[item],parent_node,0)

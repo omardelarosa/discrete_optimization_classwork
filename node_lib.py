@@ -2,6 +2,7 @@ all_nodes = []
 
 class Node:
     def __init__(self, item, room, value, current_best, parent, taken):
+        #need to refactor so that it takes an options dictionary called 'data'
         self.item = item
         self.room = room
         self.value = value
