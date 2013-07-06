@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+execfile("./node_lib.py")
+
 def solveIt(inputData):
     # Modify this code to run your optimization algorithm
 
@@ -188,9 +190,8 @@ def solveIt(inputData):
     #use the bound and branch method
 
     def run_alg_2():
-        
-        #grab 'defaultdict' from 'collections' module
-        from collections import defaultdict
+
+        #sort all items in ascending order of V/W value
 
         # sum of all values in set
         sigma_values = reduce(lambda x, y: x+y, values)
@@ -198,52 +199,60 @@ def solveIt(inputData):
         # sum of all weights in set
         sigma_weights = reduce(lambda x, y: x+y, weights)
 
-        #a dict to hold item's weights and values
-        weights_values = {}
-        weights_values['weights'] = weights
-        weights_values['values'] = values
 
-        #tree-maker
-        def tree(): return defaultdict(tree)
+        #array representing which items are taken
+        configurations = []
 
-        #convert tree to dict of dicts
-        def dicts(t): return {k: dicts(t[k]) for k in t}
+        #counters
+        current_weight = 0
+        current_value = 0
+        current_item = 0
 
-        #add or append a new node, returns its key
-        def add_child_node(tree,new_key,last_key,val):
-            tree[last_key][new_key] = val
-            return new_key
+        def make_current_config_array():
+            #make empty array for current config
+            config_array = []
+            for i in range(0,items):
+                config_array.append([])
+            return config_array
 
-        root = tree()
+        def get_next_sensible_config(configurations,acc):
 
-        #make tree
-        def make_tree_of_items(weights_values,items,init,root):
-            #takes a set of items' values and weights as 2D array and size of set
-            array = []
-            
-            #iterates over array and turns it into a binary tree
-            for i in range(init,items)
-                array.append(i)
-                if(i % 2 == 0):
-                    root[1] = [weights[i],values[i]]
-                    add_child_node(root[1],1,[weights[i],values[i]])
-                    init+=1
-                    # return make_tree_of_items(weights_values,items,init,)
+            #counters
+            current_weight = 0
+            current_value = 0
+            current_item = 0
+            #check state of configs array
+
+            #makes an empty config_array and binds it to current_config
+            current_config = make_current_config_array()
+
+            for current_item in range(0,items): 
+                if current_weight <= capacity:
+                    #take current_item
+                    current_weight += weights[current_item]
+                    current_value += values[current_item]
+                    #debug
+                    #current_configuration[current_item]
+                    current_config[current_item] = 1
                 else:
-                    print 'odd!'
-                    # add_child_node(root,0,[weights[init],values[init]])
-                    init+=1
-                    # return make_tree_of_items(weights_values,items,init,add_child_node(root,0,[weights[init],values[init]]))
-                # #if item weighs
-                # if (weights_values['weights'][i]):
-                #     add_node(a_tree,1,[weights_values['weights'][i],weights_values['values'][i]])
-                # else:
-                #     add_node(a_tree,0,[0,0])
-            
-            print array
-            #returns a tree made by their contents
-            return root
+                    # print "hit else"
+                    current_config[current_item] = 0
+        
+            print current_config
 
+            configurations.append(current_config)
+
+
+        # def next_config_of(input_array):
+        #     array_len = len(input_array)
+
+        #     for i in array_len:
+        #         if input_array[i] == 0:
+
+
+        get_next_sensible_config(configurations,0)
+        print configurations
+        
         #creates a demo tree structure
         #each node represents an item
         #each item's key is either 1 or 0 for taken or not taken respectively
@@ -269,13 +278,76 @@ def solveIt(inputData):
 
         # return node with highest value
 
-        return make_tree_of_items(weights_values,items,0,root)
+        
 
         # return root
 
     #-------------------------
     #--- END ALGORITHM 2 -----
     #-------------------------
+
+    def run_alg_3():
+        #Node(item, room, value, current_best, parent)
+
+        #a few useful values
+        # sum of all values in set
+        sigma_values = reduce(lambda x, y: x+y, values)
+
+        # sum of all weights in set
+        sigma_weights = reduce(lambda x, y: x+y, weights)
+       
+        #current best
+        current_best = sigma_values
+
+        #make root node
+        root_node = Node(-1,capacity,0,current_best,None)
+
+        #debug
+        root_node.to_s()
+
+        #build tree exhaustively
+        def build_tree(item,parent_node):
+            #start at 0th item
+            # item = 0
+
+            #add_children
+
+            #loop over each item (i.e. level of tree)
+            if parent_node != False:
+                while item < items:
+
+                    #make taken node
+                    taken_node = Node(item,parent_node.room-weights[item],value+values[item],current_best,parent_node)
+                    
+                    #make a not-taken node
+                    not_taken_node = Node(item,parent_node.room,value,current_best,parent_node)
+
+                    #debug
+                    taken_node.to_s()
+                    #debug
+                    not_taken_node.to_s()
+                    #increment by 1
+                    item+=1
+                    #stop building tree
+                    build_tree(item,not_taken_node)
+                    #build rest of tree
+                    build_tree(item,taken_node)
+
+                    
+                    #make a tree for item taken
+                    # item+=1
+                    # build_tree(item,taken_node)
+                    # build_tree(item,not_taken_node)
+
+                    #make a tree for item not taken
+
+                    # #check if item fits
+                    # if weights[item] <= root_node.capacity:
+                    #     #if it fits, create a node here
+                    
+        build_tree(0,root_node)
+
+        #get all nodes at final level
 
     value = 0
     weight = 0
@@ -295,14 +367,14 @@ def solveIt(inputData):
     #=========================
 
     #------------------------
-    #-- RUN ALGORITHM 2 ---
+    #-- RUN ALGORITHM 3 ---
     #------------------------
 
     #sets optimal value to result from running algorithm 1
-    print run_alg_2()
+    print run_alg_3()
 
     #-------------------------
-    #--- STOP ALGORITHM 2 ----
+    #--- STOP ALGORITHM 3 ----
     #-------------------------
 
     # prepare the solution in the specified output format
