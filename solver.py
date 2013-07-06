@@ -1,6 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+#timer start
+from datetime import datetime
+tstart = datetime.now()
+#timer start
+
 execfile("./node_lib.py")
 
 def solveIt(inputData):
@@ -33,321 +38,170 @@ def solveIt(inputData):
 
     items = len(values)
 
-    #------------------------
-    #--- END PREPARE INPUT --
-    #------------------------
-    #========================
-    #------------------------
-    #-- BEGIN ALGORITHM 1 ---
-    #------------------------
-
-    def run_alg_1():
-
-        #adds a zero-value col
-        def make_zero_col():
-            #adds a zeros column to end of array
-            weights.insert(0,0)
-            values.insert(0,0)
-
-        def remove_zero_col():
-            #removes zeros colum to end of array
-            weights.pop(0)
-            values.pop(0)
-        
-        #builds max_values matrix
-        max_values = []
-
-        def build_matrix():
-            for r in (range(0,capacity+1)):
-                max_values.append([])
-                for c in (range(0,items+1)):
-                    max_values[r].append([])
-        
-        #check status of items
-        def item_fits(current_item,current_cap):
-            if(weights[current_item] <= current_cap):
-                return True
-            else:
-                return False
-
-        def compare_item_to_left(current_item,current_cap):
-            #store data as variables, or default them to 0
-            val_of_item = values[current_item] if values[current_item] else 0
-            val_to_left = max_values[current_cap][current_item-1] if max_values[current_cap][current_item-1] else 0
-            val_to_left_down = max_values[current_cap-weights[current_item]][current_item-1] if max_values[current_cap-weights[current_item]][current_item-1] else 0
-            
-            #check if current item is better than item to its left (last item at same capacity)
-            if(val_of_item < val_to_left):
-                #if it is....
-                #check if val to left_down + cu
-                if((val_to_left_down + val_of_item) > val_to_left):
-                    #just return their sum
-                    return val_to_left_down + val_of_item
-                #otherwise
-                else:
-                    #return val_to_left
-                    return val_to_left
-            #if it's not...
-            #check if current item + val of diag left item are great
-            else:
-                #return the item to its left instead
-                return val_of_item
-
-        def which_items(cap,item,acc):
-            #identifies index of which items are taken and populates
-            #the 'taken' array as 'acc' by traversign the max_values matrix
-            #in reverse
-
-            if(item == 0):
-                return acc
-            elif(cap < 0 or item < 0):
-                return acc
-            elif(max_values[cap][item] == max_values[cap][item-1]):
-                #not taken
-                #add item value to array
-                acc.insert(0,0)
-                return which_items(cap,item-1,acc)
-            elif(max_values[cap][item] != max_values[cap][item-1]):
-                #taken
-                #adds item value to array
-                acc.insert(0,1)
-                return which_items(cap-weights[item],item-1,acc)
-
-        def get_val_of_best_item(current_item,current_cap):
-            #if there's no space, take the 0th item (no item)
-            if(current_cap == 0):
-                return 0
-            #if current item doesn't fit and something is to the left
-            elif(not item_fits(current_item,current_cap) and max_values[current_cap][current_item-1]):
-                #get value of item to the left
-                return max_values[current_cap][current_item-1]
-            #else if current item fits
-            elif(item_fits(current_item,current_cap)):
-                return compare_item_to_left(current_item,current_cap)
-            else:
-                return 0
-                # return 'y'
-
-        def populate_matrix():
-            for current_cap in (range(0,capacity+1)):
-                for current_item in (range(0,items+1)):
-                    max_values[current_cap][current_item] = get_val_of_best_item(current_item,current_cap)
-
-        def display_matrix_header():
-            #debug - displays heding of matrix    
-            z = 0
-            a = []
-            for z in range(0,items+1):
-                a.append(z)
-            print "-------"
-            print "Max Values of items..."
-            print a
-            print "-------"
-            print "Weights of items..."
-            print weights
-            print "Values of items..."
-            print values
-            print "-------"  
-
-        def display_matrix():
-            #debug - checks context of max_values matrix
-            for r in range(0, len(max_values)):
-                print 'cap '+str(r)+ ': ' + str(max_values[r])
-
-        #runs the first algorithm
-
-        #builds matrix
-        build_matrix()
-        #adds zeros
-        make_zero_col()
-
-        #debug
-        populate_matrix()
-
-        #debug - shows heading of max_values matrix with key
-        # display_matrix_header()
-
-        # #debug - visualizes max_values matrix
-        # display_matrix()
-
-        
-        # populates 'taken' array of which items were taken
-        which_items(capacity,items,taken)
-
-        # print taken
-
-        #returns best value
-        return max_values[capacity][items]
-
-    #------------------------
-    #--- END ALGORITHM 1 ----
-    #------------------------
-    #========================
-    #------------------------
-    #-- BEGIN ALGORITHM 2 ---
-    #------------------------
-
-    #use the bound and branch method
-
-    def run_alg_2():
-
-        #sort all items in ascending order of V/W value
-
-        # sum of all values in set
-        sigma_values = reduce(lambda x, y: x+y, values)
-
-        # sum of all weights in set
-        sigma_weights = reduce(lambda x, y: x+y, weights)
-
-
-        #array representing which items are taken
-        configurations = []
-
-        #counters
-        current_weight = 0
-        current_value = 0
-        current_item = 0
-
-        def make_current_config_array():
-            #make empty array for current config
-            config_array = []
-            for i in range(0,items):
-                config_array.append([])
-            return config_array
-
-        def get_next_sensible_config(configurations,acc):
-
-            #counters
-            current_weight = 0
-            current_value = 0
-            current_item = 0
-            #check state of configs array
-
-            #makes an empty config_array and binds it to current_config
-            current_config = make_current_config_array()
-
-            for current_item in range(0,items): 
-                if current_weight <= capacity:
-                    #take current_item
-                    current_weight += weights[current_item]
-                    current_value += values[current_item]
-                    #debug
-                    #current_configuration[current_item]
-                    current_config[current_item] = 1
-                else:
-                    # print "hit else"
-                    current_config[current_item] = 0
-        
-            print current_config
-
-            configurations.append(current_config)
-
-
-        # def next_config_of(input_array):
-        #     array_len = len(input_array)
-
-        #     for i in array_len:
-        #         if input_array[i] == 0:
-
-
-        get_next_sensible_config(configurations,0)
-        print configurations
-        
-        #creates a demo tree structure
-        #each node represents an item
-        #each item's key is either 1 or 0 for taken or not taken respectively
-        #the value of each node is an array whose first item is the remaining weight
-        #the second item is the current value
-
-        #need a function that appends a node
-
-        #creates
-
-        # def sort_list_by_vals(list):
-        #     #get unsorted list -> sorted list
-
-        # def get_estimate_for_best_total_val():
-        #     # -> best total value if 'capacity' is relaxed
-
-        # def compare_estimate_to_current_val(current_val,best_val):
-        #     # -> boolean re: whther it's better (true) or if it's not (false)
-
-        #----------ALG 2 Recipe---------
-
-        # make_tree_of_values
-
-        # return node with highest value
-
-        
-
-        # return root
-
-    #-------------------------
-    #--- END ALGORITHM 2 -----
-    #-------------------------
-
     def run_alg_3():
+
+        def make_list_of_item_dicts(values,weights):
+            items_list = []
+            for item in range(0,items):
+                items_list.append({"id": item, "value" : values[item], "weight" : weights[item], "value_to_weight" : float(values[item])/float(weights[item])})
+            return items_list
+
+        # def make_ratios_list(values,weights):
+        #     ratios_list = []
+        #     for item in range(0,items):
+        #         ratios_list.append(float(values[item])/float(weights[item]))
+        #     return ratios_list
+
+        list_of_item_dicts = make_list_of_item_dicts(values,weights)
+        sorted_list_of_item_dicts = sorted(list_of_item_dicts, key=lambda k: k['value_to_weight'])
+
+        print "Sorted items list: "
+        print sorted_list_of_item_dicts
+
+        #this could be more efficient
+        def get_relaxed_estimate():
+            room = capacity
+            current_value = 0
+            for item in sorted_list_of_item_dicts:
+                if item["weight"] < room:
+                    current_value += item["value"]
+                    room -= item["weight"]
+                else:
+                    partial_val = room * item["value_to_weight"]
+                    current_value += partial_val
+            return current_value 
+
+        # relaxed_estimate = get_relaxed_estimate()
+
         #Node(item, room, value, current_best, parent)
 
         #a few useful values
         # sum of all values in set
-        sigma_values = reduce(lambda x, y: x+y, values)
+        # sigma_values = reduce(lambda x, y: x+y, values)
 
+        # print "Sigma Values is: "
+        # print sigma_values
         # sum of all weights in set
-        sigma_weights = reduce(lambda x, y: x+y, weights)
+        # sigma_weights = reduce(lambda x, y: x+y, weights)
        
-        #current best
-        current_best = sigma_values
+        # #current best
+        current_best = get_relaxed_estimate()
 
         #make root node
-        root_node = Node(-1,capacity,0,current_best,None)
+        root_node = Node(-1,capacity,0,current_best,None,False)
 
         #debug
         root_node.to_s()
 
+        #check plausibility of next tree
+        def is_plausible(weight,room):
+            if weight <= room:
+                return True
+            else:
+                return False
+
+        #check plausibility of value
+        def is_continuing_worth_it(current_value,current_best):
+            if current_value >= current_best:
+                return True
+            else:
+                return False
+
         #build tree exhaustively
-        def build_tree(item,parent_node):
+        def add_children(item,parent_node):
             #start at 0th item
             # item = 0
 
             #add_children
-
-            #loop over each item (i.e. level of tree)
             if parent_node != False:
+                #loop over each item (i.e. level of tree)
                 while item < items:
 
-                    #make taken node
-                    taken_node = Node(item,parent_node.room-weights[item],value+values[item],current_best,parent_node)
+                    #filter only what plausibly fits
+                    if is_plausible(weights[item],parent_node.room):
+                        #make taken node
+                        taken_node = Node(item,parent_node.room-weights[item],parent_node.value+values[item],parent_node.current_best,parent_node,1)
+                    else:
+                        #dont make new node
+                        taken_node = False
+                    #filter out values 
+                    if is_continuing_worth_it(parent_node.value,parent_node.current_best):
+                        #make a not-taken node
+                        not_taken_node = Node(item,parent_node.room,parent_node.value,parent_node.current_best-values[item],parent_node,0)
+                    else:
+                        #don't make new node
+                        not_taken_node = False
                     
-                    #make a not-taken node
-                    not_taken_node = Node(item,parent_node.room,value,current_best,parent_node)
+                    # no filter
+                    # #make taken node
+                    # taken_node = Node(item,parent_node.room-weights[item],parent_node.value+values[item],parent_node.current_best,parent_node,True)
+
+                    # #make a not-taken node
+                    # not_taken_node = Node(item,parent_node.room,parent_node.value,parent_node.current_best-values[item],parent_node,0)
 
                     #debug
-                    taken_node.to_s()
-                    #debug
-                    not_taken_node.to_s()
-                    #increment by 1
+                    # taken_node.to_s()
+                    # #debug
+                    # not_taken_node.to_s()
+                    # increment by 1
                     item+=1
                     #stop building tree
-                    build_tree(item,not_taken_node)
+                    add_children(item,not_taken_node)
                     #build rest of tree
-                    build_tree(item,taken_node)
+                    add_children(item,taken_node)
 
+                        
+                        #make a tree for item taken
+                        # item+=1
+                        # add_children(item,taken_node)
+                        # add_children(item,not_taken_node)
+
+                        #make a tree for item not taken
+
+                        # #check if item fits
+                        # if weights[item] <= root_node.capacity:
+                        #     #if it fits, create a node here
                     
-                    #make a tree for item taken
-                    # item+=1
-                    # build_tree(item,taken_node)
-                    # build_tree(item,not_taken_node)
 
-                    #make a tree for item not taken
+        add_children(0,root_node)
 
-                    # #check if item fits
-                    # if weights[item] <= root_node.capacity:
-                    #     #if it fits, create a node here
-                    
-        build_tree(0,root_node)
+        #debug
+        # paths = map(lambda node: node.get_path([]), all_nodes)
+        # print paths
 
-        #get all nodes at final level
+        def get_max_value():
+            #get all nodes at final level
+            max_level_nodes_array = all_nodes[-1].get_all_nodes_at_same_level()
+
+            plausible_maxes = map(lambda node: {'value': node.value, 'id': node.id} if node.room >= 0 else 0, max_level_nodes_array)
+            # print plausible_maxes
+
+            current_max = 0
+            id_of_max = 0
+
+            for i in plausible_maxes:
+                if i["value"] > current_max:
+                    current_max = i["value"]
+                    id_of_max = i["id"]
+
+            paths = map(lambda node: node.get_path([]), all_nodes)
+
+            path_of_max = all_nodes[id_of_max].get_path([])
+
+            print "Current Max is "+str(current_max)
+            print "Current Max's ID is "+str(id_of_max)
+            print "Path of Max is " +str(path_of_max)
+            return current_max
+
+        print "Current max list is "+str(get_max_value())
+        print "Current nodes count is "+str(len(all_nodes))
+        
+
+        print "Relaxed estimate is: "
+        print get_relaxed_estimate()
+        
+        # print "Sorted list of items (by ratio):"
+        # print sorted_list
 
     value = 0
     weight = 0
@@ -397,3 +251,6 @@ if __name__ == '__main__':
     else:
         print 'This test requires an input file.  Please select one from the data directory. (i.e. python solver.py ./data/ks_4_0)'
 
+#timer end
+tend = datetime.now()
+print tend - tstart

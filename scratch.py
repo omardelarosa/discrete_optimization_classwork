@@ -1,12 +1,13 @@
 all_nodes = []
 
 class Node:
-    def __init__(self, level, room, value, current_best, parent):
+    def __init__(self, level, room, value, current_best, parent, taken_bool):
         self.level = level
         self.room = room
         self.value = value
         self.current_best = best
         self.parent = parent
+        self.taken = taken_bool
         #creates an id for the node that corresponds to its position
         #in the all_nodes array
         self.id = len(all_nodes)
