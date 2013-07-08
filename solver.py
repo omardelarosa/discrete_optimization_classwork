@@ -122,12 +122,44 @@ def solveIt(inputData):
         #     else:
         #         return False
 
+        def add_node_to_stack(node):
+            # if node_stack != []:
+
+            #     node_stack.pop()
+            node_stack.append(node)
+
+        def make_child_taken_node(node,item):
+            #make taken node
+            next_node_data = {
+                #item, room, value, current_best, parent, taken
+                "item": item,
+                "room" : node.data["room"]-weights[item],
+                "value" : node.data["value"]+values[item],
+                "current_best" : node.data["current_best"],
+                "parent" : node,
+                "taken" : 1
+            }
+            return Node(next_node_data)
+
+        def make_child_not_taken_node(node,item):
+            #make taken node
+            next_node_data = {
+                #item, room, value, current_best, parent, taken
+                "item": item,
+                "room" : node.data["room"],
+                "value" : node.data["value"],
+                "current_best" : node.data["current_best"]-values[item],
+                "parent" : node,
+                "taken" : 0
+            }
+            return Node(next_node_data)
+
         #build tree exhaustively
         def add_children(item,parent_node,current_best_node):
             #start at 0th item
             # item = 0
 
-            #add_children
+            #if it is the root node, do not recurse and return
             if parent_node != False:
                 #loop over each item (i.e. level of tree)
                 while item < items:
@@ -135,80 +167,119 @@ def solveIt(inputData):
                     value_of_taking_item = parent_node.data["value"]+values[item]
                     current_room = parent_node.data["room"]
 
-                    #if current item fits and its parent's value is better 
+                    #if current item fits 
                     if weights[item] <= current_room:
                         
-                        #make taken node
-                        taken_node_data = {
-                        #item, room, value, current_best, parent, taken
-                        "item": item,
-                        "room" : parent_node.data["room"]-weights[item],
-                        "value" : parent_node.data["value"]+values[item],
-                        "current_best" : parent_node.data["current_best"],
-                        "parent" : parent_node,
-                        "taken" : 1
-                        }
-                        
-                        taken_node = Node(taken_node_data)
+                        #need to check if making next node is worth it
+
+                        #make next node
+                        new_node = make_child_taken_node(parent_node,item)
 
                         #checks if making node is worth it
                         if value_of_taking_item > current_best_node.data["value"]:
 
                             #make current node the new best node
-                            current_best_node = taken_node
-                            #add node to the stack
-                            node_stack.append(taken_node)
+                            current_best_node = new_node
+
+                            add_node_to_stack(new_node)
+                        
+
                     else:
                         #dont make new node
-                        taken_node = False
-                    #filter out values 
-                    #need to fix
-                    #this is not working correctly
-                    if parent_node.data["value"] >= parent_node.data["current_best"]:
-                        not_taken_node_data = {
-                            #item, room, value, current_best, parent, taken
-                            "item": item,
-                            "room" : parent_node.data["room"],
-                            "value" : parent_node.data["value"],
-                            "current_best" : parent_node.data["current_best"]-values[item],
-                            "parent" : parent_node,
-                            "taken" : 0
-                            }
-                        #make a not-taken node
-                        not_taken_node = Node(not_taken_node_data)
-                    else:
-                        #don't make new node
-                        not_taken_node = False
+                        new_node = False
                     
-                    #debug
-                    # taken_node.to_s()
-                    # #debug
-                    # not_taken_node.to_s()
-                    # increment by 1
                     item+=1
-                    #stop building tree
-                    add_children(item,not_taken_node,current_best_node)
-                    #build rest of tree
-                    add_children(item,taken_node,current_best_node)
-
-                        
-                        #make a tree for item taken
-                        # item+=1
-                        # add_children(item,taken_node)
-                        # add_children(item,not_taken_node)
-
-                        #make a tree for item not taken
-
-                        # #check if item fits
-                        # if weights[item] <= root_node.capacity:
-                        #     #if it fits, create a node here
+                    # timer end
+                    if not (datetime.now() - tstart).total_seconds() > 18000:
+                        # build rest of tree
+                        add_children(item,new_node,current_best_node)
                     
-
+                    
+                    
         add_children(0,root_node,current_best_node)
 
-        #debug
-        # paths = map(lambda node: node.get_path([]), all_nodes)
-        # print paths
+        
+
+        # def iterative_tree(node):
+        #     taken_stack = []
+        #     while taken_stack != [] or node != None:
+        #         if node != None:
+        #             taken_stack.push(node)
+                    
+        #             node = node.left
+        #         else:
+        #             node = taken_stack.pop()
+        #             taken_node_data = {
+        #                 #item, room, value, current_best, parent, taken
+        #                 "item": item,
+        #                 "room" : node.data["room"]-weights[item],
+        #                 "value" : node.data["value"]+values[item],
+        #                 "current_best" : node.data["current_best"],
+        #                 "parent" : node,
+        #                 "taken" : node.data["taken"].append(1)
+        #             }
+        #             new_taken_node = Node(taken_node_data)
+        #             node = node.right
+
+        # def get_branch(start_node,max_level):
+        #     branch_stack = []
+        #     for level in range(0,max_level):
+
+        #         if start_node != None:
+
+
+
+        # def add_child(item,items,node,current_best_node):
+        #     if item > items-1:
+        #         return False
+        #     else:
+        #         #useful local vars
+        #         taken_value = node.data["value"]+values[item]
+        #         room_if_taken = node.data["room"]-weights[item]
+        #         best_value_if_not_taken = node.data["current_best"]-values[item]
+        #         not_taken_value = node.data["value"]
+        #         #if there's room...
+        #         if room_if_taken >= 0:
+        #             #then check if not taking would make negative value or 0
+        #             # if best_value_if_not_taken > 0:
+
+        #             taken_node_data = {
+        #                 #item, room, value, current_best, parent, taken
+        #                 "item": item,
+        #                 "room" : node.data["room"],
+        #                 "value" : node.data["value"],
+        #                 "current_best" : node.data["current_best"]-values[item],
+        #                 "parent" : node,
+        #                 "taken" : 0
+        #                 }
+        #             #make a taken node
+        #             new_taken_node = Node(taken_node_data) 
+
+        #             #make a not taken node
+        #             not_taken_node_data = {
+        #                     #item, room, value, current_best, parent, taken
+        #                     "item": item,
+        #                     "room" : node.data["room"],
+        #                     "value" : node.data["value"],
+        #                     "current_best" : node.data["current_best"]-values[item],
+        #                     "parent" : node,
+        #                     "taken" : 0
+        #                 }
+        #             new_not_taken_node = Node(not_taken_node_data)
+        #             add_node_to_stack(new_taken_node)
+        #             add_node_to_stack(new_not_taken_node)
+        #             # if new_taken_node.data["value"] > current_best_node.data["value"]:
+        #             #     # current_best_node = new_taken_node
+
+        #             if add_child(item+1,items,new_taken_node,current_best_node) and add_child(item+1,items,new_not_taken_node,current_best_node):
+        #                 return True
+
+        #         else:
+        #             #inplausible outcome
+        #             return False
+
+        # add_child(0,items,root_node,current_best_node)
+
 
         def get_max_value_old():
             #get all nodes at final level
@@ -234,39 +305,41 @@ def solveIt(inputData):
             # print "Path of Max is " +str(path_of_max)
             return current_max
 
-         
         def get_max_value():
             current_max = 0
             id_of_max = 0
             max_node = root_node
 
-            plausible_maxes = map(lambda node: {'value': node.data["value"], 'node': node} if node.data["room"] >= 0 else 0, node_stack)
+            # plausible_maxes = map(lambda node: {'value': node.data["value"], 'node': node} if node.data["room"] >= 0 else 0, node_stack)
 
             # print "Plausible Maxes"
             # print plausible_maxes
 
-            for i in plausible_maxes:
-                if i["value"] > current_max:
-                    current_max = i["value"]
-                    max_node = i["node"]
+            for node in node_stack:
+                # print node.to_s()
+                if node.data["value"] > current_max:
+                    current_max = node.data["value"]
+                    max_node = node
 
             path_of_max = max_node.get_path(taken,items)
             return current_max
-
-        # print "Current max list is "+str(current_max)
-        # print "Current nodes count is "+str(len(all_nodes))
         
-
-        # print "Relaxed estimate is: "
-        # print get_relaxed_estimate()
-        # print "Node Stack:"
-        # for n in node_stack:
-        #     print n.to_s()
-        
+        # print "Node Stack Size: "+str(len(node_stack))
         return get_max_value()
 
-        # print "Sorted list of items (by ratio):"
-        # print sorted_list
+        # def calc_bound(node):
+        #     taken_value = node.
+
+        # def add_children_2(node):
+        #     parent_stack = []
+        #     best_node = root_node
+
+        #     while parent_stack != [] or node != None:
+        #         if node != None:
+        #             parent_stack.push(node)
+        #         else:
+        #             node = parent_stack.pop()
+        #             if node.data["value"] > best_node 
 
     value = 0
     weight = 0
@@ -316,6 +389,6 @@ if __name__ == '__main__':
     else:
         print 'This test requires an input file.  Please select one from the data directory. (i.e. python solver.py ./data/ks_4_0)'
 
-#timer end
+# # timer end
 # tend = datetime.now()
-# print tend - tstart
+# print (tend - tstart).total_seconds()  5.0

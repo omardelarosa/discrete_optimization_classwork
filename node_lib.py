@@ -43,7 +43,7 @@ class Node:
     def to_s(self):
         print "================="
         print "My item index is " + str(self.data["item"])
-        print "My id is " + str(self.data["id"])
+        # print "My id is " + str(self.data["id"])
         print "My room is " + str(self.data["room"])
         print "My value is " + str(self.data["value"])
         print "My parent is " + str(self.data["parent"])
