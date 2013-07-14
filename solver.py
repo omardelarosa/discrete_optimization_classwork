@@ -101,7 +101,7 @@ def solveIt(inputData):
         root_node = Node(root_data)
 
         #keeps track of current best node
-        current_best_node = root_node
+        current_best_node = None
         #keeps a stack of nodes
         node_stack = []
 
@@ -167,6 +167,7 @@ def solveIt(inputData):
                     value_of_taking_item = parent_node.data["value"]+values[item]
                     current_room = parent_node.data["room"]
 
+
                     #if current item fits 
                     if weights[item] <= current_room:
                         
@@ -174,6 +175,10 @@ def solveIt(inputData):
 
                         #make next node
                         new_node = make_child_taken_node(parent_node,item)
+
+                        if not current_best_node:
+
+                            current_best_node = new_node
 
                         #checks if making node is worth it
                         if value_of_taking_item > current_best_node.data["value"]:
