@@ -101,7 +101,7 @@ def solveIt(inputData):
         root_node = Node(root_data)
 
         #keeps track of current best node
-        current_best_node = None
+        current_best_node = root_node
         #keeps a stack of nodes
         node_stack = []
 
@@ -166,27 +166,46 @@ def solveIt(inputData):
 
                     value_of_taking_item = parent_node.data["value"]+values[item]
                     current_room = parent_node.data["room"]
+                    best_value_if_not_taken = parent_node.data["current_best"]-values[item]
 
+                    # #if there is no current best node
+                    # if not current_best_node:
+                    #     #make next node
+                    #     new_node = make_child_taken_node(parent_node,item)
+                    #     #set it to the current_best_node
+                    #     current_best_node = new_node
 
                     #if current item fits 
                     if weights[item] <= current_room:
-                        
-                        #need to check if making next node is worth it
-
                         #make next node
                         new_node = make_child_taken_node(parent_node,item)
+                        add_node_to_stack(new_node)
 
-                        if not current_best_node:
+                        # if new_node.data["value"] > current_best_node.data["value"]:
+                        #     #make current node the new best node
+                        #     current_best_node = new_node
 
-                            current_best_node = new_node
+                        # #need to check if making next node is worth it
+                        # if current_best_node and best_value_if_not_taken < current_best_node.data["current_best"]:
+                        #     #dont make new node
+                        #     new_node = False
+                        # else:
+                        #     #make next node
+                        #     new_node = make_child_taken_node(parent_node,item)
+                        #     if not current_best_node:
+                        #         current_best_node = new_node
 
-                        #checks if making node is worth it
-                        if value_of_taking_item > current_best_node.data["value"]:
+                        #     #set it to the current_best_node
+                        #     if current_best_node and new_node.data["value"] > current_best_node.data["value"]:
+                        #         current_best_node = new_node
 
-                            #make current node the new best node
-                            current_best_node = new_node
+                        #     #checks if new worth it
+                        #     elif value_of_taking_item > current_best_node.data["value"]:
 
-                            add_node_to_stack(new_node)
+                        #         #make current node the new best node
+                        #         current_best_node = new_node
+
+                                # add_node_to_stack(new_node)
                         
 
                     else:
@@ -195,11 +214,22 @@ def solveIt(inputData):
                     
                     item+=1
                     # timer end
-                    if not (datetime.now() - tstart).total_seconds() > 18000:
+                    # if not (datetime.now() - tstart).total_seconds() > 18000 :
                         # build rest of tree
+
+                    #some filtering
+                    if best_value_if_not_taken < current_best_node.data["value"]:
+                        break
+                    else:
+                        if new_node and new_node.data["value"] > current_best_node.data["value"]:
+                            current_best_node = new_node
+                            
                         add_children(item,new_node,current_best_node)
+
+                    #no filtering
+                    # add_children(item,new_node,current_best_node)
                     
-                    
+
                     
         add_children(0,root_node,current_best_node)
 
@@ -328,8 +358,10 @@ def solveIt(inputData):
 
             path_of_max = max_node.get_path(taken,items)
             return current_max
-        
+
         # print "Node Stack Size: "+str(len(node_stack))
+        print current_best_node.to_s()
+
         return get_max_value()
 
         # def calc_bound(node):
