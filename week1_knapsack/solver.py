@@ -38,6 +38,8 @@ def solveIt(inputData):
 
     items = len(values)
 
+    current_best_node = None
+
     def run_alg_3():
 
         def make_list_of_item_dicts(values,weights):
@@ -94,6 +96,7 @@ def solveIt(inputData):
             "room" : capacity,
             "value" : 0,
             "current_best" : current_best,
+            "current_best_node" : None,
             "parent" : None,
             "taken" : False
             }
@@ -103,7 +106,7 @@ def solveIt(inputData):
         #keeps track of current best node
         current_best_node = root_node
         #keeps a stack of nodes
-        node_stack = []
+        node_stack = [root_node]
 
         #debug
         # root_node.to_s()
@@ -136,10 +139,11 @@ def solveIt(inputData):
                 "room" : node.data["room"]-weights[item],
                 "value" : node.data["value"]+values[item],
                 "current_best" : node.data["current_best"],
+                "current_best_node" : node.data["current_best_node"],
                 "parent" : node,
                 "taken" : 1
             }
-            return Node(next_node_data)
+            return next_node_data
 
         def make_child_not_taken_node(node,item):
             #make taken node
@@ -150,37 +154,81 @@ def solveIt(inputData):
                 "value" : node.data["value"],
                 "current_best" : node.data["current_best"]-values[item],
                 "parent" : node,
+                "current_best_node" : node.data["current_best_node"],
                 "taken" : 0
             }
-            return Node(next_node_data)
+            return next_node_data
+
+        # def estimate_child(parent_node,item):
+        #     child_data = {
+        #         "next_node_taken_room" : parent_node.data["room"]-weights[item],
+        #         "next_node_not_taken_room" : parent_node.data["room"],
+        #         "next_node_taken_value" : parent_node.data["value"]+values[item],
+        #         "next_node_not_taken_value" : parent_node.data["value"],
+        #         "next_node_taken_current_best" : parent_node.data["current_best"],
+        #         "next_node_not_taken_current_best" : parent_node.data["current_best"]-values[item]
+        #     }
+        #     return child_data
+            
 
         #build tree exhaustively
-        def add_children(item,parent_node,current_best_node):
+        def add_children(item,parent_node):
             #start at 0th item
             # item = 0
 
+            current_best_node = parent_node
+
+            # if current_best_node != root_node and current_best_node == parent_node:
+            #     return parent_node
+
             #if it is the root node, do not recurse and return
-            if parent_node != False:
+            if parent_node != parent_node.data["parent"]:
                 #loop over each item (i.e. level of tree)
                 while item < items:
 
                     #estimate values of next item
-                    next_node_taken_room = parent_node.data["room"]-weights[item]
-                    next_node_not_taken_room = parent_node.data["room"]
+                    child_taken_node_data = make_child_taken_node(parent_node,item)
+                    child_not_taken_node_data = make_child_not_taken_node(parent_node,item)
 
-                    next_node_taken_value = parent_node.data["value"]+values[item]
-                    next_node_not_taken_value = parent_node.data["value"]
+                    #if next item fits 
+                    if child_taken_node_data["room"] >= 0:
 
-                    next_node_taken_current_best = parent_node.data["current_best"]
-                    next_node_not_taken_current_best = parent_node.data["current_best"]-values[item]
+                            #take item
+                            new_node = Node(child_taken_node_data)
+                            
+                            if new_node.data["value"] >= parent_node.data["current_best_node"].data["value"]:
+                                parent_node.data["current_best_node"] = new_node
+                                # node_stack.append(new_node)
 
-                    #if next item fits
-                    if next_node_taken_room >= 0 and next_node_not_taken_current_best > current_best_node.data["value"]:
-                        # and if the value of not taking the next item is not less than the next item's current_best 
-                        new_node = make_child_taken_node(parent_node,item)
-                        add_node_to_stack(new_node)
+                            # new_node = Node(child_not_taken_node_data)
+                            # node_stack.append(new_node)
+                            # #check to see if item depth level is the end
+                            # if item == items-1:
+                            #     print "New Node is " + new_node.to_s()
+                            
+                        # if child_taken_node_data["current_best"] > current_best_node.data["value"]:
+                        #     new_node = Node(child_not_taken_node_data)
+                            # node_stack.append(new_node)
+                            
+                            
+
+                    #check if not taking item is worth it
+                    elif child_not_taken_node_data["current_best"] >= current_best:
+                        #don't take item
+                        new_node = Node(child_not_taken_node_data)
+                        
+
+                        if new_node.data["value"] >= parent_node.data["current_best_node"].data["value"]:
+                            parent_node.data["current_best_node"] = new_node
+                            # node_stack.append(new_node)
+                        # #don't take item
+                        # new_node = Node(child_not_taken_node_data)
+                        # node_stack.append(new_node)
+
+                    #else take best leaf
                     else:
-                        new_node = False
+                        new_node = parent_node
+                        node_stack.append(new_node.data["current_best_node"])
                     
                     
                     # timer end
@@ -189,21 +237,22 @@ def solveIt(inputData):
 
                     #no filtering
                     # add_children(item,new_node,current_best_node)
-                    if new_node and new_node.data["value"] >= current_best_node.data["value"]:
-                        current_best_node = new_node
-                    elif new_node == False:
-                        if next_node_taken_value >= current_best_node.data["value"]:
-                            current_best_node = make_child_taken_node(parent_node,item)
-                        elif next_node_not_taken_value >= current_best_node.data["value"]:
-                            current_best_node = make_child_not_taken_node(parent_node,item)
+                    if new_node and new_node.data["value"] >= parent_node.data["current_best_node"].data["value"]:
+                        parent_node.data["current_best_node"] = new_node
                             
                     item += 1
-                    add_children(item,new_node,current_best_node)
+                    add_children(item,new_node)
+                    
             
-            return current_best_node                    
+            if parent_node.data["current_best_node"].data["value"] >= current_best_node.data["value"]:
+                current_best_node = parent_node
+
+            
+            return current_best_node
+                 
 
                     
-        new_best = add_children(0,root_node,current_best_node)
+        new_best = add_children(0,root_node)
 
         print new_best.to_s()
 
